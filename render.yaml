@@ -1,0 +1,36 @@
+# Blueprint de Render para el backend de Aurora VI Enterprise.
+# Uso: Render Dashboard → New → Blueprint → seleccionar este repositorio.
+services:
+  - type: web
+    name: aurora-vi-api
+    runtime: python
+    plan: free
+    region: oregon
+    rootDir: backend
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips='*'
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: ENVIRONMENT
+        value: production
+      - key: SECRET_KEY
+        generateValue: true          # Render genera un valor aleatorio seguro
+      - key: DATABASE_URL
+        sync: false                  # Pegar la cadena de conexión de Supabase (ver docs/DESPLIEGUE.md)
+      - key: CORS_ORIGINS
+        sync: false                  # https://tu-app.vercel.app
+      - key: CORS_ORIGIN_REGEX
+        value: ^https://aurora-vi-[a-z0-9-]+\.vercel\.app$
+      - key: AUTO_SEED
+        value: "true"
+      - key: SEED_DEMO_DATA
+        value: "true"                # false en producción real: crea solo un administrador
+      - key: ADMIN_EMAIL
+        value: admin@auroravi.com
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: TAX_RATE
+        value: "0.18"
